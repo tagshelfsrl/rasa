@@ -203,7 +203,6 @@ class GCSPersistor(Persistor):
 
     def _retrieve_tar(self, target_filename: Text) -> None:
         """Downloads a model that has previously been persisted to GCS."""
-
         blob = self.bucket.blob(target_filename)
         blob.download_to_filename(target_filename)
 
@@ -252,7 +251,6 @@ class AzurePersistor(Persistor):
 
     def _retrieve_tar(self, target_filename: Text) -> None:
         """Downloads a model that has previously been persisted to Azure."""
-
         self.blob_client.get_blob_to_path(
             self.container_name, target_filename, target_filename
         )
