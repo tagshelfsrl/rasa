@@ -24,13 +24,14 @@ Understand messages, hold conversations, and connect to messaging channels and A
 
    user-guide/installation
    user-guide/rasa-tutorial
+   user-guide/building-assistants
    user-guide/command-line-interface
    user-guide/architecture
    user-guide/messaging-and-voice-channels
    user-guide/evaluating-models
    user-guide/validate-files
-   user-guide/running-the-server
-   user-guide/running-rasa-with-docker
+   user-guide/configuring-http-api
+   user-guide/how-to-deploy
    user-guide/cloud-storage
 
 .. toctree::
@@ -59,8 +60,10 @@ Understand messages, hold conversations, and connect to messaging channels and A
    core/policies
    core/slots
    core/forms
+   core/retrieval-actions
    core/interactive-learning
    core/fallback-actions
+   core/knowledge-bases
 
 .. toctree::
    :maxdepth: 1
@@ -82,12 +85,14 @@ Understand messages, hold conversations, and connect to messaging channels and A
    api/jupyter-notebooks
    api/agent
    api/custom-nlu-components
+   api/rasa-sdk
    api/events
    api/tracker
    api/tracker-stores
    api/event-brokers
+   api/lock-stores
    api/training-data-importers
-   api/featurization
+   api/core-featurization
    migration-guide
    changelog
 

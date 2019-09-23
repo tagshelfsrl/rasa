@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # -- General configuration ------------------------------------------------
 import re
@@ -53,7 +52,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Rasa"
-copyright = "2019, Rasa Technologies"
+copyright = "2020, Rasa Technologies"
 author = "Rasa Technologies"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -62,7 +61,7 @@ author = "Rasa Technologies"
 #
 # The short X.Y version.
 __version__ = None
-exec (open("../rasa/version.py").read())
+exec(open("../rasa/version.py").read())
 version = ".".join(__version__.split(".")[:2])
 # The full version, including alpha/beta/rc tags.
 release = __version__
@@ -88,7 +87,6 @@ exclude_patterns = [
     "Thumbs.db",
     ".DS_Store",
     # ignore doc pages that we don't show to appease keep_warnings
-    "multi-skill-assistants.rst",
     "core/old-core-change-log.rst",
     "core/old-core-migration-guide.rst",
     "nlu/old-nlu-change-log.rst",
@@ -325,19 +323,27 @@ os.chdir(os.path.abspath('..'))
 
 # extlinks configuration
 
-extlinks = {
-    "gh-code": ("https://github.com/RasaHQ/rasa/tree/{}/%s".format(release), "github ")
-}
+extlinks = {"gh-code": (f"https://github.com/RasaHQ/rasa/tree/{release}/%s", "github ")}
 
 # Sphinxcontrib configuration
 scv_priority = "tags"
 scv_show_banner = True
 scv_banner_greatest_tag = True
 scv_sort = ("semver",)
-scv_whitelist_branches = ("master",)  # (re.compile("^master$"),)
+scv_whitelist_branches = (re.compile("^master$"),)
 # scv_whitelist_tags = ('None',)
 scv_grm_exclude = ("README.md", ".gitignore", ".nojekyll", "CNAME")
-scv_whitelist_tags = (re.compile(r"^[1-9]+\.[0-9]+\.\d+$"),)
+scv_whitelist_tags = (
+    re.compile(r"^[2-9]+\.\d+\.\d+$"),
+    re.compile(r"^1\.[1-9][0-9]+\.\d+$"),
+    re.compile(r"^1\.[6789]\.\d+$"),
+    re.compile(r"^1\.5\.3$"),
+    re.compile(r"^1\.4\.6$"),
+    re.compile(r"^1\.3\.10$"),
+    re.compile(r"^1\.2\.9$"),
+    re.compile(r"^1\.1\.8$"),
+    re.compile(r"^1\.0\.9$"),
+)
 scv_greatest_tag = True
 
 # type classes for nitpicky to ignore
@@ -347,6 +353,7 @@ nitpick_ignore = [
     ("py:class", "bool"),
     ("py:class", "int"),
     ("py:class", "Any"),
+    ("py:class", "dict"),
     ("py:class", "Dict"),
     ("py:class", "List"),
     ("py:class", "Text"),
@@ -393,4 +400,4 @@ def setup(sphinx):
 
         sphinx.add_lexer("story", StoryLexer())
     except ImportError:
-        print ("No Story Lexer :( Sad times!")
+        print("No Story Lexer :( Sad times!")

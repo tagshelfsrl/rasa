@@ -1,12 +1,14 @@
+import json
+import logging
 import os
 import sys
-import json
-import re
-from typing import Any, Optional, Text, List, Dict
-import logging
-from questionary import Question
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Text
+
+if TYPE_CHECKING:
+    from questionary import Question
 
 from rasa.constants import DEFAULT_MODELS_PATH
+from typing import NoReturn
 
 logger = logging.getLogger(__name__)
 
@@ -33,16 +35,20 @@ def get_validated_path(
         The current value if it was valid, else the default value of the
         argument if it is valid, else `None`.
     """
-
     if current is None or current is not None and not os.path.exists(current):
         if default is not None and os.path.exists(default):
-            reason_str = "'{}' not found.".format(current)
+            reason_str = f"'{current}' not found."
             if current is None:
-                reason_str = "Parameter '{}' not set.".format(parameter)
+                reason_str = f"Parameter '{parameter}' not set."
+            else:
+                from rasa.utils.common import raise_warning  # avoid import cycle
 
-            logger.debug(
-                "{} Using default location '{}' instead.".format(reason_str, default)
-            )
+                raise_warning(
+                    f"The path '{current}' does not seem to exist. Using the "
+                    f"default value '{default}' instead."
+                )
+
+            logger.debug(f"{reason_str} Using default location '{default}' instead.")
             current = default
         elif none_is_valid:
             current = None
@@ -77,7 +83,7 @@ def cancel_cause_not_found(
 
     default_clause = ""
     if default:
-        default_clause = "use the default location ('{}') or ".format(default)
+        default_clause = f"use the default location ('{default}') or "
     print_error(
         "The path '{}' does not exist. Please make sure to {}specify it"
         " with '--{}'.".format(current, default_clause, parameter)
@@ -91,7 +97,10 @@ def parse_last_positional_argument_as_model_path() -> None:
 
     if (
         len(sys.argv) >= 2
+        # support relevant commands ...
         and sys.argv[1] in ["run", "shell", "interactive"]
+        # but avoid interpreting subparser commands as model paths
+        and sys.argv[1:] != ["run", "actions"]
         and not sys.argv[-2].startswith("-")
         and os.path.exists(sys.argv[-1])
     ):
@@ -124,8 +133,8 @@ def create_output_path(
         else:
             time_format = "%Y%m%d-%H%M%S"
             name = time.strftime(time_format)
-            name = "{}{}".format(prefix, name)
-        file_name = "{}.tar.gz".format(name)
+            name = f"{prefix}{name}"
+        file_name = f"{name}.tar.gz"
         return os.path.join(output_path, file_name)
 
 
@@ -165,7 +174,7 @@ def element_to_string(element: Dict[Text, Any], idx: int = 0) -> Text:
 
 def button_choices_from_message_data(
     message: Dict[Text, Any], allow_free_text_input: bool = True
-) -> Question:
+) -> "Question":
     """Return list of choices to present to the user.
 
     If allow_free_text_input is True, an additional option is added
@@ -181,7 +190,7 @@ def button_choices_from_message_data(
     return choices
 
 
-def payload_from_button_question(button_question: Question) -> Text:
+def payload_from_button_question(button_question: "Question") -> Text:
     """Prompt user with a button question and returns the nlu payload."""
     response = button_question.ask()
     if response != FREE_TEXT_INPUT_PROMPT:
@@ -190,7 +199,7 @@ def payload_from_button_question(button_question: Question) -> Text:
     return response
 
 
-class bcolors(object):
+class bcolors:
     HEADER = "\033[95m"
     OKBLUE = "\033[94m"
     OKGREEN = "\033[92m"
@@ -206,7 +215,7 @@ def wrap_with_color(*args: Any, color: Text):
 
 
 def print_color(*args: Any, color: Text):
-    print (wrap_with_color(*args, color=color))
+    print(wrap_with_color(*args, color=color))
 
 
 def print_success(*args: Any):
@@ -225,6 +234,13 @@ def print_error(*args: Any):
     print_color(*args, color=bcolors.FAIL)
 
 
-def signal_handler(sig, frame):
-    print ("Goodbye 👋")
+def print_error_and_exit(message: Text, exit_code: int = 1) -> None:
+    """Print error message and exit the application."""
+
+    print_error(message)
+    sys.exit(exit_code)
+
+
+def signal_handler(sig, frame) -> NoReturn:
+    print("Goodbye 👋")
     sys.exit(0)
