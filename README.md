@@ -202,4 +202,5 @@ Copyright 2020 Rasa Technologies GmbH. [Copy of the license](LICENSE.txt).
 
 A list of the Licenses of the dependencies of the project can be found at
 the bottom of the
+
 [Libraries Summary](https://libraries.io/github/RasaHQ/rasa).
