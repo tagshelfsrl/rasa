@@ -139,6 +139,7 @@ def serve_application(
     channel: Optional[Text] = None,
     port: int = constants.DEFAULT_SERVER_PORT,
     credentials: Optional[Text] = None,
+    remote_path: Optional[Text] = None,
     cors: Optional[Union[Text, List[Text]]] = None,
     auth_token: Optional[Text] = None,
     enable_api: bool = True,
@@ -179,7 +180,7 @@ def serve_application(
     )
 
     app.register_listener(
-        partial(load_agent_on_start, model_path, endpoints, remote_storage),
+        partial(load_agent_on_start, model_path, endpoints, remote_storage, remote_path),
         "before_server_start",
     )
 
@@ -199,6 +200,7 @@ async def load_agent_on_start(
     model_path: Text,
     endpoints: AvailableEndpoints,
     remote_storage: Optional[Text],
+    remote_path: Optional[Text],
     app: Sanic,
     loop: Text,
 ):
@@ -227,6 +229,7 @@ async def load_agent_on_start(
         model_path,
         model_server=model_server,
         remote_storage=remote_storage,
+        remote_path=remote_path,
         interpreter=_interpreter,
         generator=endpoints.nlg,
         tracker_store=_tracker_store,

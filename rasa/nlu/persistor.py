@@ -43,7 +43,7 @@ class Persistor(object):
         file_key, tar_path = self._compress(model_directory, model_name)
         self._persist_tar(file_key, tar_path)
 
-    def retrieve(self, model_name: Text, target_path: Text) -> None:
+    def retrieve(self, model_name: Text, target_path: Text, remote_path: Optional[Text] = None) -> None:
         """Downloads a model that has been persisted to cloud storage."""
 
         tar_name = model_name
@@ -52,7 +52,7 @@ class Persistor(object):
             # ensure backward compatibility
             tar_name = self._tar_name(model_name)
 
-        self._retrieve_tar(tar_name)
+        self._retrieve_tar(tar_name, remote_path)
         self._decompress(tar_name, target_path)
 
     def list_models(self) -> List[Text]:
@@ -60,7 +60,7 @@ class Persistor(object):
 
         raise NotImplementedError
 
-    def _retrieve_tar(self, filename: Text) -> Text:
+    def _retrieve_tar(self, filename: Text, remote_path: Optional[Text] = None) -> Text:
         """Downloads a model previously persisted to cloud storage."""
 
         raise NotImplementedError("")
@@ -151,11 +151,12 @@ class AWSPersistor(Persistor):
         with open(tar_path, "rb") as f:
             self.s3.Object(self.bucket_name, file_key).put(Body=f)
 
-    def _retrieve_tar(self, target_filename: Text) -> None:
+    def _retrieve_tar(self, target_filename: Text, remote_path: Optional[Text] = None) -> None:
         """Downloads a model that has previously been persisted to s3."""
+        remote_target = remote_path if remote_path else target_filename
 
         with io.open(target_filename, "wb") as f:
-            self.bucket.download_fileobj(target_filename, f)
+            self.bucket.download_fileobj(remote_target, f)
 
 
 class GCSPersistor(Persistor):
@@ -205,8 +206,8 @@ class GCSPersistor(Persistor):
 
     def _retrieve_tar(self, target_filename: Text) -> None:
         """Downloads a model that has previously been persisted to GCS."""
-
-        blob = self.bucket.blob(target_filename)
+        remote_target = remote_path if remote_path else target_filename
+        blob = self.bucket.blob(remote_target)
         blob.download_to_filename(target_filename)
 
 
@@ -252,9 +253,10 @@ class AzurePersistor(Persistor):
 
         self.blob_client.create_blob_from_path(self.container_name, file_key, tar_path)
 
-    def _retrieve_tar(self, target_filename: Text) -> None:
+    def _retrieve_tar(self, target_filename: Text, remote_path: Optional[Text] = None) -> None:
         """Downloads a model that has previously been persisted to Azure."""
+        remote_target = remote_path if remote_path else target_filename
 
         self.blob_client.get_blob_to_path(
-            self.container_name, target_filename, target_filename
+            self.container_name, target_filename, remote_target
         )
