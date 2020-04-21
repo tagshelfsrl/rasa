@@ -1,32 +1,32 @@
 import typing
-from typing import Any
+from typing import Text, List
 
-from rasa.nlu.components import Component
-from rasa.nlu.config import RasaNLUModelConfig
-from rasa.nlu.tokenizers import Token, Tokenizer
-from rasa.nlu.training_data import Message, TrainingData
+from rasa.nlu.tokenizers.tokenizer import Token, Tokenizer
+from rasa.nlu.training_data import Message
+
+from rasa.nlu.constants import TOKENS_NAMES, SPACY_DOCS, DENSE_FEATURIZABLE_ATTRIBUTES
 
 if typing.TYPE_CHECKING:
     from spacy.tokens.doc import Doc  # pytype: disable=import-error
 
 
-class SpacyTokenizer(Tokenizer, Component):
+class SpacyTokenizer(Tokenizer):
 
-    provides = ["tokens"]
+    provides = [TOKENS_NAMES[attribute] for attribute in DENSE_FEATURIZABLE_ATTRIBUTES]
 
-    requires = ["spacy_doc"]
+    requires = [SPACY_DOCS[attribute] for attribute in DENSE_FEATURIZABLE_ATTRIBUTES]
 
-    def train(
-        self, training_data: TrainingData, config: RasaNLUModelConfig, **kwargs: Any
-    ) -> None:
+    defaults = {
+        # Flag to check whether to split intents
+        "intent_tokenization_flag": False,
+        # Symbol on which intent should be split
+        "intent_split_symbol": "_",
+    }
 
-        for example in training_data.training_examples:
-            example.set("tokens", self.tokenize(example.get("spacy_doc")))
+    def get_doc(self, message: Message, attribute: Text) -> "Doc":
+        return message.get(SPACY_DOCS[attribute])
 
-    def process(self, message: Message, **kwargs: Any) -> None:
+    def tokenize(self, message: Message, attribute: Text) -> List[Token]:
+        doc = self.get_doc(message, attribute)
 
-        message.set("tokens", self.tokenize(message.get("spacy_doc")))
-
-    def tokenize(self, doc: "Doc") -> typing.List[Token]:
-
-        return [Token(t.text, t.idx) for t in doc]
+        return [Token(t.text, t.idx, lemma=t.lemma_) for t in doc]

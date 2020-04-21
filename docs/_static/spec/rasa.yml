@@ -16,6 +16,7 @@ paths:
       tags:
       - Server Information
       summary: Health endpoint of Rasa Server
+      operationId: getHealth
       description: >-
         This URL can be used as an endpoint to run
         health checks against. When the server is running
@@ -35,6 +36,7 @@ paths:
     get:
       tags:
       - Server Information
+      operationId: getVersion
       summary: Version of Rasa
       description: >-
         Returns the version of Rasa.
@@ -64,11 +66,12 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: getStatus
       tags:
       - Server Information
-      summary: Status of the currently loaded Rasa model
+      summary: Status of the Rasa server
       description: >-
-        Information about the currently loaded Rasa model.
+        Information about the server and the currently loaded Rasa model.
       responses:
         200:
           description: Success
@@ -95,6 +98,10 @@ paths:
                     type: string
                     description: Path of the loaded model
                     example: 20190429-103105.tar.gz
+                  num_active_training_jobs:
+                    type: integer
+                    description: Number of running training processes
+                    example: 2
         401:
           $ref: '#/components/responses/401NotAuthenticated'
         403:
@@ -108,6 +115,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: getConversationTracker
       tags:
       - Tracker
       summary: Retrieve a conversations tracker
@@ -139,6 +147,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: addConversationTrackerEvents
       tags:
       - Tracker
       summary: Append events to a tracker
@@ -177,6 +186,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: replaceConversationTrackerEvents
       tags:
       - Tracker
       summary: Replace a trackers events
@@ -213,6 +223,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: getConversationStory
       tags:
       - Tracker
       summary: Retrieve an end-to-end story corresponding to a conversation
@@ -240,11 +251,13 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: executeConversationAction
       tags:
       - Tracker
       summary: Run an action in a conversation
+      deprecated: true
       description: >-
-        Runs the action, calling the action server if necessary.
+        DEPRECATED. Runs the action, calling the action server if necessary.
         Any responses sent by the executed action will be forwarded
         to the channel specified in the output_channel parameter.
         If no output channel is specified, any messages that should be
@@ -284,11 +297,63 @@ paths:
         500:
           $ref: '#/components/responses/500ServerError'
 
+  /conversations/{conversation_id}/trigger_intent:
+    post:
+      security:
+        - TokenAuth: []
+        - JWT: []
+      operationId: triggerConversationIntent
+      tags:
+        - Tracker
+      summary: Inject an intent into a conversation
+      description: >-
+        Sends a specified intent and list of entities in place of a
+        user message. The bot then predicts and executes a response action.
+        Any responses sent by the executed action will be forwarded
+        to the channel specified in the ``output_channel`` parameter.
+        If no output channel is specified, any messages that should be
+        sent to the user will be included in the response of this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/conversation_id'
+        - $ref: '#/components/parameters/include_events'
+        - $ref: '#/components/parameters/output_channel'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntentTriggerRequest'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracker:
+                    $ref: '#/components/schemas/Tracker'
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BotMessage'
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401NotAuthenticated'
+        403:
+          $ref: '#/components/responses/403NotAuthorized'
+        409:
+          $ref: '#/components/responses/409Conflict'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
   /conversations/{conversation_id}/predict:
     post:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: predictConversationAction
       tags:
       - Tracker
       summary: Predict the next action
@@ -324,6 +389,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: addConversationMessage
       tags:
       - Tracker
       summary: Add a message to a tracker
@@ -361,13 +427,14 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: trainModel
       tags:
       - Model
       summary: Train a Rasa model
       description: >-
-        Trains a Rasa model. Depending on the data given only a dialogue model,
+        Trains a new Rasa model. Depending on the data given only a dialogue model,
         only a NLU model, or a model combining a trained dialogue model with an
-        NLU model will be trained. The trained model is not loaded by default.
+        NLU model will be trained. The new model is not loaded by default.
       requestBody:
         required: true
         content:
@@ -400,6 +467,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: testModelStories
       tags:
       - Model
       summary: Evaluate stories
@@ -437,6 +505,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: testModelIntent
       tags:
       - Model
       summary: Perform an intent evaluation
@@ -473,6 +542,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: predictModelAction
       tags:
       - Model
       summary: Predict an action on a temporary state
@@ -513,6 +583,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: parseModelMessage
       tags:
       - Model
       summary: Parse a message using the Rasa model
@@ -559,6 +630,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: replaceModel
       tags:
       - Model
       summary: Replace the currently loaded model
@@ -589,6 +661,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: unloadModel
       tags:
       - Model
       summary: Unload the trained model
@@ -607,6 +680,7 @@ paths:
       security:
       - TokenAuth: []
       - JWT: []
+      operationId: getDomain
       tags:
       - Domain
       summary: Retrieve the loaded domain
@@ -883,19 +957,32 @@ components:
       type: object
       properties:
         name:
-          description: >-
-            Name of the action to be executed.
+          description: Name of the action to be executed.
           type: string
           example: utter_greet
         policy:
-          description: >-
-            Name of the policy that predicted the action (optional).
+          description: Name of the policy that predicted the action.
           type: string
+          nullable: true
         confidence:
-          description: >-
-            Confidence of the prediction (optional).
+          description: Confidence of the prediction.
           type: number
+          nullable: true
           example: 0.987232
+      required: ["name"]
+
+    IntentTriggerRequest:
+      type: object
+      properties:
+        name:
+          description: Name of the intent to be executed.
+          type: string
+          example: greet
+        entities:
+          description: Entities to be passed on.
+          type: object
+          nullable: true
+          example: {"temperature": "high"}
       required: ["name"]
 
     Message:
@@ -1022,7 +1109,7 @@ components:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/SlotDescription'
-        templates:
+        responses:
           description: Bot response templates
           type: object
           additionalProperties:
@@ -1206,15 +1293,16 @@ components:
           $ref: '#/components/schemas/NLUTrainingData'
         stories:
           $ref: '#/components/schemas/StoriesTrainingData'
-        out:
-          type: string
-          description: Output directory
-          example: models
         force:
           type: boolean
           description: >-
             Force a model training even if the data has not changed
           example: false
+        save_to_default_model_directory:
+          type: boolean
+          description:  >-
+            If `true` (default) the trained model will be saved in the default model
+            directory, if `false` it will be saved in a temporary directory
       required: ["config"]
 
     NLUTrainingData:
@@ -1222,27 +1310,103 @@ components:
       description: Rasa NLU training data in markdown format
       example:  >-
         ## intent:greet
+
         - hey
+
         - hello
 
+        - hi
+
         ## intent:goodbye
-        - cu
+
+        - bye
+
         - goodbye
+
+        - have a nice day
+
+        - see you
+
+        ## intent:affirm
+
+        - yes
+
+        - indeed
+
+        ## intent:deny
+
+        - no
+
+        - never
+
+        ## intent:mood_great
+
+        - perfect
+
+        - very good
+
+        - great
+
+        ## intent:mood_unhappy
+
+        - sad
+
+        - not good
+
+        - unhappy
+
 
     StoriesTrainingData:
       type: string
       description: Rasa Core stories in markdown format
       example: >-
         ## happy path
+
         * greet
+
           - utter_greet
+
         * mood_great
+
           - utter_happy
 
         ## sad path 1
+
         * greet
+
           - utter_greet
+
         * mood_unhappy
+
+          - utter_cheer_up
+
+          - utter_did_that_help
+
+        * affirm
+
+          - utter_happy
+
+        ## sad path 2
+
+        * greet
+
+          - utter_greet
+
+        * mood_unhappy
+
+          - utter_cheer_up
+
+          - utter_did_that_help
+
+        * deny
+
+          - utter_goodbye
+
+        ## say goodbye
+
+        * goodbye
+
+          - utter_goodbye
 
     DomainFile:
       type: string
@@ -1257,13 +1421,13 @@ components:
           - mood_unhappy
 
         actions:
-        - utter_greet
-        - utter_cheer_up
-        - utter_did_that_help
-        - utter_happy
-        - utter_goodbye
+          - utter_greet
+          - utter_cheer_up
+          - utter_did_that_help
+          - utter_happy
+          - utter_goodbye
 
-        templates:
+        responses:
           utter_greet:
           - text: "Hey! How are you?"
 
@@ -1284,13 +1448,10 @@ components:
       type: string
       description: Rasa config in plain text
       example: >-
-        # Configuration for Rasa NLU.
-        # https://rasa.com/docs/nlu/components/
         language: en
+
         pipeline: supervised_embeddings
 
-        # Configuration for Rasa Core.
-        # https://rasa.com/docs/core/policies
         policies:
           - name: MemoizationPolicy
           - name: KerasPolicy
@@ -1496,4 +1657,3 @@ components:
         properties:
           use_entities:
             type: boolean
-

@@ -31,19 +31,19 @@ def get_persistor(name: Text) -> Optional["Persistor"]:
     return None
 
 
-class Persistor(object):
+class Persistor:
     """Store models in cloud and fetch them when needed"""
 
     def persist(self, model_directory: Text, model_name: Text) -> None:
         """Uploads a model persisted in the `target_dir` to cloud storage."""
 
         if not os.path.isdir(model_directory):
-            raise ValueError("Target directory '{}' not found.".format(model_directory))
+            raise ValueError(f"Target directory '{model_directory}' not found.")
 
         file_key, tar_path = self._compress(model_directory, model_name)
         self._persist_tar(file_key, tar_path)
 
-    def retrieve(self, model_name: Text, target_path: Text, remote_path: Optional[Text] = None) -> None:
+    def retrieve(self, model_name: Text, target_path: Text) -> None:
         """Downloads a model that has been persisted to cloud storage."""
 
         tar_name = model_name
@@ -52,15 +52,15 @@ class Persistor(object):
             # ensure backward compatibility
             tar_name = self._tar_name(model_name)
 
-        self._retrieve_tar(tar_name, remote_path)
-        self._decompress(tar_name, target_path)
+        self._retrieve_tar(tar_name)
+        self._decompress(os.path.basename(tar_name), target_path)
 
     def list_models(self) -> List[Text]:
         """Lists all the trained models."""
 
         raise NotImplementedError
 
-    def _retrieve_tar(self, filename: Text, remote_path: Optional[Text] = None) -> Text:
+    def _retrieve_tar(self, filename: Text) -> Text:
         """Downloads a model previously persisted to cloud storage."""
 
         raise NotImplementedError("")
@@ -99,7 +99,7 @@ class Persistor(object):
     def _tar_name(model_name: Text, include_extension: bool = True) -> Text:
 
         ext = ".tar.gz" if include_extension else ""
-        return "{m}{ext}".format(m=model_name, ext=ext)
+        return f"{model_name}{ext}"
 
     @staticmethod
     def _decompress(compressed_path: Text, target_path: Text) -> None:
@@ -116,7 +116,7 @@ class AWSPersistor(Persistor):
     def __init__(self, bucket_name: Text, endpoint_url: Optional[Text] = None) -> None:
         import boto3
 
-        super(AWSPersistor, self).__init__()
+        super().__init__()
         self.s3 = boto3.resource("s3", endpoint_url=endpoint_url)
         self._ensure_bucket_exists(bucket_name)
         self.bucket_name = bucket_name
@@ -129,7 +129,7 @@ class AWSPersistor(Persistor):
                 for obj in self.bucket.objects.filter()
             ]
         except Exception as e:
-            logger.warning("Failed to list models in AWS. {}".format(e))
+            logger.warning(f"Failed to list models in AWS. {e}")
             return []
 
     def _ensure_bucket_exists(self, bucket_name: Text) -> None:
@@ -151,12 +151,11 @@ class AWSPersistor(Persistor):
         with open(tar_path, "rb") as f:
             self.s3.Object(self.bucket_name, file_key).put(Body=f)
 
-    def _retrieve_tar(self, target_filename: Text, remote_path: Optional[Text] = None) -> None:
+    def _retrieve_tar(self, model_path: Text) -> None:
         """Downloads a model that has previously been persisted to s3."""
-        remote_target = remote_path if remote_path else target_filename
-
-        with io.open(target_filename, "wb") as f:
-            self.bucket.download_fileobj(remote_target, f)
+        tar_name = os.path.basename(model_path)
+        with open(tar_name, "wb") as f:
+            self.bucket.download_fileobj(model_path, f)
 
 
 class GCSPersistor(Persistor):
@@ -167,7 +166,7 @@ class GCSPersistor(Persistor):
     def __init__(self, bucket_name: Text) -> None:
         from google.cloud import storage
 
-        super(GCSPersistor, self).__init__()
+        super().__init__()
 
         self.storage_client = storage.Client()
         self._ensure_bucket_exists(bucket_name)
@@ -184,9 +183,7 @@ class GCSPersistor(Persistor):
                 for b in blob_iterator
             ]
         except Exception as e:
-            logger.warning(
-                "Failed to list models in google cloud storage. {}".format(e)
-            )
+            logger.warning(f"Failed to list models in google cloud storage. {e}")
             return []
 
     def _ensure_bucket_exists(self, bucket_name: Text) -> None:
@@ -206,8 +203,7 @@ class GCSPersistor(Persistor):
 
     def _retrieve_tar(self, target_filename: Text) -> None:
         """Downloads a model that has previously been persisted to GCS."""
-        remote_target = remote_path if remote_path else target_filename
-        blob = self.bucket.blob(remote_target)
+        blob = self.bucket.blob(target_filename)
         blob.download_to_filename(target_filename)
 
 
@@ -219,7 +215,7 @@ class AzurePersistor(Persistor):
     ) -> None:
         from azure.storage import blob as azureblob
 
-        super(AzurePersistor, self).__init__()
+        super().__init__()
 
         self.blob_client = azureblob.BlockBlobService(
             account_name=azure_account_name,
@@ -245,7 +241,7 @@ class AzurePersistor(Persistor):
                 for b in blob_iterator
             ]
         except Exception as e:
-            logger.warning("Failed to list models azure blob storage. {}".format(e))
+            logger.warning(f"Failed to list models azure blob storage. {e}")
             return []
 
     def _persist_tar(self, file_key: Text, tar_path: Text) -> None:
@@ -253,10 +249,8 @@ class AzurePersistor(Persistor):
 
         self.blob_client.create_blob_from_path(self.container_name, file_key, tar_path)
 
-    def _retrieve_tar(self, target_filename: Text, remote_path: Optional[Text] = None) -> None:
+    def _retrieve_tar(self, target_filename: Text) -> None:
         """Downloads a model that has previously been persisted to Azure."""
-        remote_target = remote_path if remote_path else target_filename
-
         self.blob_client.get_blob_to_path(
-            self.container_name, target_filename, remote_target
+            self.container_name, target_filename, target_filename
         )

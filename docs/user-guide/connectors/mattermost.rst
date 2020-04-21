@@ -22,11 +22,12 @@ Getting Credentials
       You will need to ensure the **trigger words** section is set up
       with ``@yourbotname`` so that the bot doesn't trigger on everything
       that is said.
-   4. Make sure **trigger when** is set to value
+   4. The **Content Type** must be set to ``application/json``.
+   5. Make sure **trigger when** is set to value
       **first word matches a trigger word exactly**.
-   5. The callback url needs to be your ngrok url where you
+   6. The callback url needs to be either your localhost address for Rasa, or your ngrok url where you
       have your webhook running in Core or your public address, e.g.
-      ``http://test.example.com/webhooks/mattermost/webhook``.
+      ``http://test.example.com/webhooks/mattermost/webhook`` or ``http://localhost:5005/webhooks/mattermost/webhook``.
 
 
 For more detailed steps, visit the
@@ -49,9 +50,10 @@ you need to supply a ``credentials.yml`` with the following content:
    mattermost:
      url: "https://chat.example.com/api/v4"
      team: "community"
-     user: "user@user.com"
+     user: "user@user.com" #  actual username of your bot user, not displayname
      pw: "password"
+     webhook_url: "https://server.example.com/webhooks/mattermost/webhook"
 
 The endpoint for receiving Mattermost channel messages
-is ``/webhooks/mattermost/webhook``. This is the url you should
-add in the Mattermost outgoing webhook.
+is ``/webhooks/mattermost/webhook``, the same as ``webhook_url`` here. You should
+add this url also in the Mattermost outgoing webhook.
