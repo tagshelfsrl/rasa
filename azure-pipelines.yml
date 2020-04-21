@@ -5,12 +5,14 @@
 
 trigger:
   branches:
+    include:
     - master
     - development
     - feature/*
     - bugfix/*
     - hotfix/*
   tags:
+    include:
     - v*
 
 pr:
