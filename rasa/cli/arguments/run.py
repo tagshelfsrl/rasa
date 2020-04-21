@@ -52,6 +52,11 @@ def add_server_arguments(parser: argparse.ArgumentParser):
         help="Enable CORS for the passed origin. Use * to whitelist all origins.",
     )
     server_arguments.add_argument(
+        "--remote-path",
+        type=str,
+        help="Define a custom path for remote models.",
+    )
+    server_arguments.add_argument(
         "--enable-api",
         action="store_true",
         help="Start the web server API in addition to the input channel.",

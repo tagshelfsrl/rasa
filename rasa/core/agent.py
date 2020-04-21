@@ -227,6 +227,7 @@ async def load_agent(
     model_path: Optional[Text] = None,
     model_server: Optional[EndpointConfig] = None,
     remote_storage: Optional[Text] = None,
+    remote_path: Optional[Text] = None,
     interpreter: Optional[NaturalLanguageInterpreter] = None,
     generator: Union[EndpointConfig, NaturalLanguageGenerator] = None,
     tracker_store: Optional[TrackerStore] = None,
@@ -252,6 +253,7 @@ async def load_agent(
             return Agent.load_from_remote_storage(
                 remote_storage,
                 model_path,
+                remote_path,
                 interpreter=interpreter,
                 generator=generator,
                 tracker_store=tracker_store,
@@ -965,6 +967,7 @@ class Agent:
     def load_from_remote_storage(
         remote_storage: Text,
         model_name: Text,
+        remote_path: Optional[Text] = None,
         interpreter: Optional[NaturalLanguageInterpreter] = None,
         generator: Union[EndpointConfig, NaturalLanguageGenerator] = None,
         tracker_store: Optional[TrackerStore] = None,
