@@ -4,12 +4,14 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-  - master
-  - development
-  - feature/*
-  - bugfix/*
-  - hotfix/*
-  - refs/tags/v*
+  branches:
+    - master
+    - development
+    - feature/*
+    - bugfix/*
+    - hotfix/*
+  tags:
+    - v*
 
 pr:
   - master
