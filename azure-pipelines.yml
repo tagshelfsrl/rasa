@@ -9,6 +9,7 @@ trigger:
   - feature/*
   - bugfix/*
   - hotfix/*
+  - refs/tags/v*
 
 pr:
   - master
@@ -28,6 +29,7 @@ steps:
       docker login -u $(registryUser) -p $(registryPass) $(registry)
       docker build -f Dockerfile -t $(imageName) .
     displayName: "docker build"
+
   # Tags builded image with the "stable" tag if its "master" branch and push
   - script: docker tag $(imageName) "$(registry)/$(imageName):stable"
     displayName: "docker tag master as stable"
@@ -37,6 +39,7 @@ steps:
       docker push $(registry)/$(imageName):stable
     displayName: "docker push master as stable"
     condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+
   # Tags builded image with the "latest" tag if its "development" branch and push
   - script: docker tag $(imageName) "$(registry)/$(imageName):latest"
     displayName: "docker tag development as latest"
@@ -46,6 +49,19 @@ steps:
       docker push $(registry)/$(imageName):latest
     displayName: "docker push development as latest"
     condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'development'))
+
+  # Tag the GitHub tag docker image
+  - script: docker tag $(imageName) "$(registry)/$(imageName):$(Build.SourceBranchName)"
+    displayName: "tag the GitHub tag docker image"
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+
+  # Push the GitHub tag docker image
+  - script: |
+      docker login -u $(registryUser) -p $(registryPass) $(registry)
+      docker push $(registry)/$(imageName):$(Build.SourceBranchName)
+    displayName: "push the GitHub tag docker image"
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+
   # Tags builded image with the branchName_commitHash tag if its "master" or "development" branch and push
   - script: docker tag $(imageName) "$(registry)/$(imageName):$(build.SourceBranchName)_$(build.SourceVersion)"
     displayName: "docker tag branch_version"
