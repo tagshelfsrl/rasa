@@ -16,6 +16,8 @@ DEFAULT_LOCK_LIFETIME = 60  # in seconds
 
 REQUESTED_SLOT = "requested_slot"
 
+FORM_ID_SLOT = "form_id"
+
 # slots for knowledge base
 SLOT_LISTED_ITEMS = "knowledge_base_listed_objects"
 SLOT_LAST_OBJECT = "knowledge_base_last_object"

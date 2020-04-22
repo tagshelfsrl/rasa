@@ -311,6 +311,7 @@ class Agent:
 
         if self.domain is not None:
             self.domain.add_requested_slot()
+            self.domain.add_form_id()
             self.domain.add_knowledge_base_slots()
 
         PolicyEnsemble.check_domain_ensemble_compatibility(
