@@ -26,6 +26,7 @@ from rasa.core.actions.action import Action  # pytype: disable=pyi-error
 from rasa.core.constants import (
     DEFAULT_KNOWLEDGE_BASE_ACTION,
     REQUESTED_SLOT,
+    FORM_ID_SLOT,
     SLOT_LAST_OBJECT,
     SLOT_LAST_OBJECT_TYPE,
     SLOT_LISTED_ITEMS,
@@ -402,6 +403,14 @@ class Domain:
         """
         if self.form_names and REQUESTED_SLOT not in [s.name for s in self.slots]:
             self.slots.append(UnfeaturizedSlot(REQUESTED_SLOT))
+
+    def add_form_id(self) -> None:
+        """Add a slot called `form_id` to the list of slots.
+
+        The value of this slot will hold a unique identifier for the active forms.
+        """
+        if self.form_names and FORM_ID_SLOT not in [s.name for s in self.slots]:
+            self.slots.append(UnfeaturizedSlot(FORM_ID_SLOT))
 
     def add_knowledge_base_slots(self) -> None:
         """
