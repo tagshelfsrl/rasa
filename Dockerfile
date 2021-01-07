@@ -47,11 +47,11 @@ COPY requirements.txt .
 COPY LICENSE.txt .
 
 # Install dependencies
-RUN pip install -U pip wheel && pip install --no-deps -r requirements.txt 
+RUN pip install -U pip==20.3.3 wheel && pip install --use-deprecated=legacy-resolver -r requirements.txt 
 
 # Install Rasa as package
 COPY rasa ./rasa
-RUN pip install --no-deps .[sql]
+RUN pip install --use-deprecated=legacy-resolver .[sql]
 
 # Runtime stage which uses the virtualenv which we built in the previous stage
 FROM base AS runner
