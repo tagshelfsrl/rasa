@@ -8,12 +8,12 @@ RUN python -m venv /build
 
 # Install common libraries
 RUN apt-get update -qq \
- && apt-get install -y --no-install-recommends \
-    # required by psycopg2 at build and runtime
-    libpq-dev \
-     # required for health check
-    curl \
- && apt-get autoremove -y
+   && apt-get install -y --no-install-recommends \
+   # required by psycopg2 at build and runtime
+   libpq-dev \
+   # required for health check
+   curl \
+   && apt-get autoremove -y
 
 # Make sure we use the virtualenv
 ENV PATH="/build/bin:$PATH"
@@ -25,18 +25,18 @@ WORKDIR /src
 
 # Install all required build libraries
 RUN apt-get update -qq \
- && apt-get install -y --no-install-recommends \
-    build-essential \
-    wget \
-    openssh-client \
-    graphviz-dev \
-    pkg-config \
-    git-core \
-    openssl \
-    libssl-dev \
-    libffi6 \
-    libffi-dev \
-    libpng-dev
+   && apt-get install -y --no-install-recommends \
+   build-essential \
+   wget \
+   openssh-client \
+   graphviz-dev \
+   pkg-config \
+   git-core \
+   openssl \
+   libssl-dev \
+   libffi6 \
+   libffi-dev \
+   libpng-dev
 
 # Copy only what we really need
 COPY README.md .
@@ -47,11 +47,11 @@ COPY requirements.txt .
 COPY LICENSE.txt .
 
 # Install dependencies
-RUN pip install -U pip && pip install --no-cache-dir -r requirements.txt
+RUN pip install -U pip wheel && pip install --no-deps -r requirements.txt 
 
 # Install Rasa as package
 COPY rasa ./rasa
-RUN pip install .[sql]
+RUN pip install --no-deps .[sql]
 
 # Runtime stage which uses the virtualenv which we built in the previous stage
 FROM base AS runner
