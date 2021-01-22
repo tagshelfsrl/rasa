@@ -1,5 +1,8 @@
 # Rasa (Tagshelf Version)
 
+**Rasa Version:** v1.8.3
+**Tagshelf Rasa Version:** v1.8.3.0
+
 Rasa is an open source machine learning framework to automate text-and voice-based conversations. With Rasa, you can build contexual assistants on:
 
 - Facebook Messenger
