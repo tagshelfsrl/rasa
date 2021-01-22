@@ -1,5 +1,8 @@
 # Rasa (Tagshelf Version)
 
+**Rasa Version:** v1.8.3
+**Tagshelf Rasa Version:** v1.8.3.0
+
 Rasa is an open source machine learning framework to automate text-and voice-based conversations. With Rasa, you can build contexual assistants on:
 
 - Facebook Messenger
@@ -24,8 +27,6 @@ discussed – Rasa enables you to build assistants that can do this in a scalabl
 There's a lot more background information in this
 [blog post](https://medium.com/rasa-blog/a-new-approach-to-conversational-software-2e64a5d05f2a).
 
----
-
 - **What does Rasa do? 🤔**
   [Check out our Website](https://rasa.com/)
 
@@ -46,8 +47,6 @@ There's a lot more background information in this
 
 - **I would like to contribute 🤗**
   [How to Contribute](#how-to-contribute)
-
----
 
 ## Where to get help
 
@@ -84,13 +83,38 @@ also be asked to sign a
 
 ## Development Internals
 
+<<<<<<< HEAD
+
 ### Running and changing the documentation
 
-To build & edit the docs, first install all necessary dependencies:
+# To build & edit the docs, first install all necessary dependencies:
+
+### Building from source
+
+Rasa uses Poetry for packaging and dependency management. If you want to build it from source,
+you have to install Poetry first. This is how it can be done:
 
 ```
-pip3 install -r requirements-dev.txt
-pip3 install -r requirements-docs.txt
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3
+```
+
+There are several other ways to install Poetry. Please, follow
+[the official guide](https://python-poetry.org/docs/#installation) to see all possible options.
+
+To install dependencies and `rasa` itself in editable mode execute
+
+```
+make install
+```
+
+### Running and changing the documentation
+
+> > > > > > > v1.8.3
+
+First of all, install all the required dependencies:
+
+```
+make install
 ```
 
 After the installation has finished, you can run and view the documentation
@@ -110,8 +134,6 @@ In order to run the tests, make sure that you have the development requirements 
 
 ```bash
 export PIP_USE_PEP517=false
-pip3 install -r requirements-dev.txt
-pip3 install -e .
 make prepare-tests-ubuntu # Only on Ubuntu and Debian based systems
 make prepare-tests-macos  # Only on macOS
 ```
@@ -132,7 +154,13 @@ Where `[n]` is the number of jobs desired. If omitted, `[n]` will be automatical
 
 ### Steps to release a new version
 
-Releasing a new version is quite simple, as the packages are build and distributed by travis.
+<<<<<<< HEAD
+
+# Releasing a new version is quite simple, as the packages are build and distributed by travis.
+
+Releasing a new version is quite simple, as the packages are build and distributed by GitHub Actions.
+
+> > > > > > > v1.8.3
 
 _Terminology_:
 
@@ -142,27 +170,40 @@ _Terminology_:
 
 _Release steps_:
 
-1. Make sure all dependencies are up to date (**especially Rasa SDK**)
-2. Switch to the branch you want to cut the release from (`master` in case of a major / minor, the current feature branch for patch releases)
-3. Run `make release`
-4. Create a PR against master or the release branch (e.g. `1.2.x`)
-5. Once your PR is merged, tag a new release (this SHOULD always happen on master or release branches), e.g. using
-   ```bash
-   git tag 1.2.0 -m "next release"
-   git push origin 1.2.0
-   ```
-   travis will build this tag and push a package to [pypi](https://pypi.python.org/pypi/rasa)
-6. **If this is a minor release**, a new release branch should be created pointing to the same commit as the tag to allow for future patch releases, e.g.
-   ```bash
-   git checkout -b 1.2.x
-   git push origin 1.2.x
-   ```
+1.  Make sure all dependencies are up to date (**especially Rasa SDK**)
+2.  Switch to the branch you want to cut the release from (`master` in case of a major / minor, the current feature branch for patch releases)
+3.  Run `make release`
+4.  Create a PR against master or the release branch (e.g. `1.2.x`)
+5.  Once your PR is merged, tag a new release (this SHOULD always happen on master or release branches), e.g. using
+    <<<<<<< HEAD
+    ```bash
+    git tag 1.2.0 -m "next release"
+    git push origin 1.2.0
+    ```
+    # travis will build this tag and push a package to [pypi](https://pypi.python.org/pypi/rasa)
+        ```bash
+        git tag 1.2.0 -m "next release"
+        git push origin 1.2.0
+        ```
+        GitHub will build this tag and push a package to [pypi](https://pypi.python.org/pypi/rasa)
+    > > > > > > > v1.8.3
+6.  **If this is a minor release**, a new release branch should be created pointing to the same commit as the tag to allow for future patch releases, e.g.
+    ```bash
+    git checkout -b 1.2.x
+    git push origin 1.2.x
+    ```
 
 ### Code Style
 
 To ensure a standardized code style we use the formatter [black](https://github.com/ambv/black).
+<<<<<<< HEAD
 To ensure our type annotations are correct we use the type checker [pytype](https://github.com/google/pytype).
 If your code is not formatted properly or doesn't type check, travis will fail to build.
+=======
+To ensure our type annotations are correct we use the type checker [pytype](https://github.com/google/pytype).
+If your code is not formatted properly or doesn't type check, GitHub will fail to build.
+
+> > > > > > > v1.8.3
 
 #### Formatting
 
@@ -170,7 +211,7 @@ If you want to automatically format your code on every commit, you can use [pre-
 Just install it via `pip install pre-commit` and execute `pre-commit install` in the root folder.
 This will add a hook to the repository, which reformats files on every commit.
 
-If you want to set it up manually, install black via `pip install -r requirements-dev.txt`.
+If you want to set it up manually, install black via `poetry install`.
 To reformat files execute
 
 ```
@@ -179,7 +220,7 @@ make formatter
 
 #### Type Checking
 
-If you want to check types on the codebase, install `pytype` using `pip install -r requirements-dev.txt`.
+If you want to check types on the codebase, install `pytype` using `poetry install`.
 To check the types execute
 
 ```
@@ -192,7 +233,7 @@ We use `sphinx-versioning` to build docs for tagged versions and for the master 
 The static site that gets built is pushed to the `docs` branch of this repo, which doesn't contain
 any code, only the site.
 
-We host the site on netlify. On master branch builds (see `.travis.yml`), we push the built docs to the `docs`
+We host the site on netlify. On master branch builds (see `.github/workflows/documentation.yml`), we push the built docs to the `docs`
 branch. Netlify automatically re-deploys the docs pages whenever there is a change to that branch.
 
 ## License
